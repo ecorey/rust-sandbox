@@ -14,3 +14,18 @@ fn vec_to_string(v: Vec<u8>) -> String {
     // return the string
     s
 }
+
+// create a struct that holds a uid and a name
+struct User {
+    uid: u32,
+    name: String,
+}
+
+
+// a function to instantiate the struct
+fn create_user(uid: u32, name: String) -> User {
+    User {
+        uid,
+        name,
+    }
+}
