@@ -1,65 +1,66 @@
+use std::fs::File;
+use std::io::{self, BufRead, BufReader, Write};
+
 fn main() {
-    println!("Hello, world!");
+    // Writing to a file
+    let write_result = write_to_file("output.txt", "Hello, Rust!");
 
-    // call below functions
-    print_numbers();
-    print_numbers_for();
-}
-
-// create a function that takes a vector of u8 and returns a string
-fn vec_to_string(v: Vec<u8>) -> String {
-    // create a new string
-    let mut s = String::new();
-    // iterate over the vector
-    for i in v {
-        // push the character to the string
-        s.push(i as char);
+    match write_result {
+        Ok(_) => println!("Successfully wrote to the file."),
+        Err(error) => {
+            match error.kind() {
+                std::io::ErrorKind::NotFound => {
+                    println!("File not found: {}", error)
+                }
+                std::io::ErrorKind::PermissionDenied => {
+                    println!("Permission denied: {}", error)
+                }
+                _ => {
+                    println!("Error writing to file: {}", error)
+                }
+            }
+        }
     }
-    // return the string
-    s
-}
 
-// create a struct that holds a uid and a name
-struct User {
-    uid: u32,
-    name: String,
-}
-
-
-// a function to instantiate the struct
-fn create_user(uid: u32, name: String) -> User {
-    User {
-        uid,
-        name,
-    }
-}
-
-// create an if/else statement
-fn check_user(user: User) {
-    if user.uid == 0 {
-        println!("This is the root user");
-    } else {
-        println!("This is a regular user");
-    }
-}
-
-
-// create a loop that prints the numbers 1-10 using loop   
-fn print_numbers() {
-    let mut i = 1;
-    loop {
-        println!("{}", i);
-        i += 1;
-        if i > 10 {
-            break;
+    // Reading from a file (assuming the file exists)
+    let file = File::open("output.txt");
+    let file = match file {
+        Ok(file) => file,
+        Err(error) => {
+            match error.kind() {
+                std::io::ErrorKind::NotFound => {
+                    panic!("File not found: {}", error)
+                }
+                std::io::ErrorKind::PermissionDenied => {
+                    panic!("Permission denied: {}", error)
+                }
+                _ => {
+                    panic!("Error opening file: {}", error)
+                }
+            }
+        }
+    };
+    
+    let reader = BufReader::new(file);
+    for line in reader.lines() {
+        match line {
+            Ok(line) => println!("{}", line),
+            Err(error) => {
+                panic!("Error reading line: {}", error)
+            }
         }
     }
 }
 
+// Function to write to a file
+fn write_to_file(filename: &str, content: &str) -> io::Result<()> {
+    let mut file = match File::create(filename) {
+        Ok(file) => file,
+        Err(error) => return Err(error),
+    };
 
-// create a for loop that prints the numbers 1-10 using for
-fn print_numbers_for() {
-    for i in 1..11 {
-        println!("{}", i);
+    match file.write_all(content.as_bytes()) {
+        Ok(_) => Ok(()),
+        Err(error) => Err(error),
     }
 }
